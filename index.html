@@ -144,6 +144,18 @@
                 <label><input type="checkbox" value="doors" id="doors${roomCount}" onchange="calculateCosts()"> Doors</label>
             </div>
 
+            <label for="wallCoats${roomCount}">Select Coats for Walls:</label>
+            <select id="wallCoats${roomCount}" onchange="calculateCosts()">
+                <option value="2">2 Coats</option>
+                <option value="3">3 Coats</option>
+            </select>
+
+            <label for="trimCoats${roomCount}">Select Coats for Trims:</label>
+            <select id="trimCoats${roomCount}" onchange="calculateCosts()">
+                <option value="2">2 Coats</option>
+                <option value="3">3 Coats</option>
+            </select>
+
             <h2 class="result" id="result${roomCount}"></h2>
         </div>`;
         document.getElementById('roomsContainer').insertAdjacentHTML('beforeend', roomHTML);
@@ -152,11 +164,12 @@
 
     function calculateCosts() {
         const prices = {
-            smoothCeiling: 1.50, // Price per sqft for smooth ceilings
-            texturedCeiling: 1.75, // Price per sqft for textured ceilings
-            standardTrim: 1.50, // Price per sqft for standard trim
-            detailedTrim: 2.50, // Price per sqft for detailed trim
-            door: 1.80 // Price per sqft for doors
+            walls: { base: 2.99, threeCoats: 4.49 },
+            smoothCeiling: 1.50,
+            texturedCeiling: 1.75,
+            standardTrim: { base: 1.50, threeCoats: 2.25 },
+            detailedTrim: { base: 2.50, threeCoats: 2.85 },
+            door: 65 // Flat price for doors
         };
 
         let totalCost = 0;
@@ -175,36 +188,46 @@
             const height = parseFloat(document.getElementById(`roomHeight${i}`).value) || 0;
             const numDoors = parseInt(document.getElementById(`numDoors${i}`).value) || 0;
 
-            // Calculate floor area
             const areaFloor = length * width;
+            const areaWalls = 2 * height * (length + width);
+            const areaCeiling = areaFloor; // Ceiling area equals floor area
+            const areaTrim = (2 * (length + width)) * (4 / 12); // Assuming trim height is 4 inches
+            const areaDoors = numDoors * 21; // Assuming each door is 21 sq ft
 
             let roomCost = 0;
+            const wallCoats = document.getElementById(`wallCoats${i}`).value;
+            const trimCoats = document.getElementById(`trimCoats${i}`).value;
 
-            // Determine wall price based on ceiling height
-            const wallPrice = height <= 9 ? 2.99 : 4.50;
-
+            // Determine wall price based on coats
+            const wallPrice = wallCoats === "3" ? prices.walls.threeCoats : prices.walls.base;
             if (document.getElementById(`walls${i}`)?.checked) {
-                roomCost += areaFloor * wallPrice; // Use floor area for wall cost
-                totalAreaToPaint += areaFloor; // Add floor area to total for paint
+                roomCost += areaFloor * wallPrice;
+                totalAreaToPaint += areaWalls; // Add wall area to total for paint
             }
+
             if (document.getElementById(`ceilingSmooth${i}`)?.checked) {
-                roomCost += areaFloor * prices.smoothCeiling; // Use floor area for smooth ceiling cost
-                totalAreaToPaint += areaFloor; // Add ceiling area to total for paint
+                roomCost += areaCeiling * prices.smoothCeiling;
+                totalAreaToPaint += areaCeiling; // Add ceiling area to total for paint
             }
             if (document.getElementById(`ceilingTextured${i}`)?.checked) {
-                roomCost += areaFloor * prices.texturedCeiling; // Use floor area for textured ceiling cost
-                totalAreaToPaint += areaFloor; // Add ceiling area to total for paint
+                roomCost += areaCeiling * prices.texturedCeiling;
+                totalAreaToPaint += areaCeiling; // Add ceiling area to total for paint
             }
+
+            // Determine trim price based on coats
             if (document.getElementById(`trimStandard${i}`)?.checked) {
-                roomCost += areaFloor * prices.standardTrim; // Use floor area for standard trim cost
-                totalAreaToPaint += areaFloor; // Add trim area to total for paint
+                const trimPrice = trimCoats === "3" ? prices.standardTrim.threeCoats : prices.standardTrim.base;
+                roomCost += areaTrim * trimPrice;
+                totalAreaToPaint += areaTrim; // Add trim area to total for paint
             }
             if (document.getElementById(`trimDetailed${i}`)?.checked) {
-                roomCost += areaFloor * prices.detailedTrim; // Use floor area for detailed trim cost
-                totalAreaToPaint += areaFloor; // Add trim area to total for paint
+                const trimPrice = trimCoats === "3" ? prices.detailedTrim.threeCoats : prices.detailedTrim.base;
+                roomCost += areaTrim * trimPrice;
+                totalAreaToPaint += areaTrim; // Add trim area to total for paint
             }
+
             if (document.getElementById(`doors${i}`)?.checked) {
-                roomCost += numDoors * 21 * prices.door; // Assuming each door is 21 sq ft
+                roomCost += numDoors * prices.door;
             }
 
             // Display room cost
