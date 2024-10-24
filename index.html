@@ -152,7 +152,6 @@
 
     function calculateCosts() {
         const prices = {
-            walls: { base: 2.99, upgrade: 4.50 }, // Wall prices based on height
             ceiling: 1.2, // Price per sqft for ceilings
             trim: 2.0, // Price per sqft for trim
             door: 1.8 // Price per sqft for doors
@@ -174,30 +173,29 @@
             const height = parseFloat(document.getElementById(`roomHeight${i}`).value) || 0;
             const numDoors = parseInt(document.getElementById(`numDoors${i}`).value) || 0;
 
-            const areaWalls = 2 * height * (length + width);
-            const areaCeiling = length * width;
-            const areaTrim = (2 * (length + width)) * (4 / 12); // Convert trim height to feet
-            const areaDoors = numDoors * 21; // Assuming each door is 21 sq ft
+            // Calculate floor area
+            const areaFloor = length * width;
 
             let roomCost = 0;
 
             // Determine wall price based on ceiling height
-            const wallPrice = height <= 9 ? prices.walls.base : prices.walls.upgrade;
+            const wallPrice = height <= 9 ? 2.99 : 4.50;
 
             if (document.getElementById(`walls${i}`)?.checked) {
-                roomCost += areaWalls * wallPrice;
-                totalAreaToPaint += areaWalls; // Add wall area to total for paint
+                roomCost += areaFloor * wallPrice; // Use floor area for wall cost
+                totalAreaToPaint += areaFloor; // Add floor area to total for paint
             }
             if (document.getElementById(`ceilingSmooth${i}`)?.checked || document.getElementById(`ceilingTextured${i}`)?.checked) {
-                roomCost += areaCeiling * prices.ceiling;
-                totalAreaToPaint += areaCeiling; // Add ceiling area to total for paint
+                roomCost += areaFloor * prices.ceiling; // Use floor area for ceiling cost
+                totalAreaToPaint += areaFloor; // Add ceiling area to total for paint
             }
             if (document.getElementById(`trimStandard${i}`)?.checked || document.getElementById(`trimDetailed${i}`)?.checked) {
+                const areaTrim = (2 * (length + width)) * (4 / 12); // Trim area in sqft
                 roomCost += areaTrim * prices.trim;
                 totalAreaToPaint += areaTrim; // Add trim area to total for paint
             }
             if (document.getElementById(`doors${i}`)?.checked) {
-                roomCost += areaDoors * prices.door;
+                roomCost += numDoors * 21 * prices.door; // Assuming each door is 21 sq ft
             }
 
             // Display room cost
