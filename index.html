@@ -123,13 +123,13 @@
             <input type="text" id="roomName${roomCount}" required>
 
             <label for="roomLength${roomCount}">Room Length (ft):</label>
-            <input type="number" id="roomLength${roomCount}" required oninput="calculateCosts()">
+            <input type="number" id="roomLength${roomCount}" min="0" required oninput="calculateCosts()">
 
             <label for="roomWidth${roomCount}">Room Width (ft):</label>
-            <input type="number" id="roomWidth${roomCount}" required oninput="calculateCosts()">
+            <input type="number" id="roomWidth${roomCount}" min="0" required oninput="calculateCosts()">
 
             <label for="roomHeight${roomCount}">Room Height (ft):</label>
-            <input type="number" id="roomHeight${roomCount}" required oninput="calculateCosts()">
+            <input type="number" id="roomHeight${roomCount}" min="0" required oninput="calculateCosts()">
 
             <label for="numDoors${roomCount}">Number of Doors:</label>
             <input type="number" id="numDoors${roomCount}" min="0" value="0" oninput="calculateCosts()">
@@ -164,18 +164,18 @@
 
     function calculateCosts() {
         const prices = {
-            walls: { twoCoats: 2.99, threeCoats: 4.49 },
-            smoothCeiling: 1.50, // Fixed for 2 coats
-            standardTrim: { twoCoats: 1.50, threeCoats: 2.25 },
-            detailedTrim: { twoCoats: 2.20, threeCoats: 3.00 },
-            door: 65, // Flat price for doors
-            emeraldPaintUpgradeCost: 43.85 // Cost increase for Emerald Paint
+            superPaint: { twoCoats: 2.99, threeCoats: 4.45 },
+            emeraldPaintBase: 43.85,
+            coveragePerGallon: 400,
+            smoothCeiling: 1.50,
+            texturedCeiling: 1.75,
+            standardTrim: { base: 1.50, threeCoats: 2.25 },
+            detailedTrim: { base: 2.20, threeCoats: 3.00 },
+            door: 65
         };
 
         let totalCost = 0;
-        let totalAreaToPaint = 0; // Initialize total area for paint calculation
-        const coveragePerGallon = 400; // Coverage per gallon for all paints
-
+        let totalWallArea = 0; // For calculating paint needed
         const selectedPaintType = document.getElementById('projectPaintType').value;
 
         for (let i = 1; i <= roomCount; i++) {
@@ -189,41 +189,44 @@
             const numDoors = parseInt(document.getElementById(`numDoors${i}`).value) || 0;
 
             const areaFloor = length * width; // Floor area
-            const areaWalls = 2 * height * (length + width); // Total wall surface area
-            const areaCeiling = areaFloor; // Ceiling area equals floor area
-            const areaTrim = (2 * (length + width)) * (4 / 12); // Assuming trim height is 4 inches
+            const areaWalls = 2 * height * (length + width); // Wall area
 
             let roomCost = 0;
-            const wallCoats = document.getElementById(`wallCoats${i}`).value;
-            const trimCoats = document.getElementById(`trimCoats${i}`).value;
 
-            // Calculate wall cost based on floor area
-            const wallPrice = wallCoats === "3" ? prices.walls.threeCoats : prices.walls.twoCoats;
+            // Calculate wall cost
+            const wallCoats = document.getElementById(`wallCoats${i}`).value;
             if (document.getElementById(`walls${i}`)?.checked) {
-                roomCost += areaFloor * wallPrice; // Pricing based on floor area
-                totalAreaToPaint += areaWalls; // Add wall area to total for paint
+                if (selectedPaintType === 'superPaint') {
+                    const wallPrice = wallCoats === "2" ? prices.superPaint.twoCoats : prices.superPaint.threeCoats;
+                    roomCost += areaFloor * wallPrice; // Cost based on floor area
+                } else if (selectedPaintType === 'emeraldPaint') {
+                    // Step 1: Calculate wall surface area for 2 or 3 coats
+                    const emeraldWallPrice = wallCoats === "2" ? prices.superPaint.twoCoats : prices.superPaint.threeCoats;
+                    const gallonsNeeded = Math.ceil(areaWalls / prices.coveragePerGallon);
+                    // Step 3: Add additional $43.85 per gallon
+                    roomCost += (gallonsNeeded * prices.emeraldPaintBase) + (areaFloor * emeraldWallPrice);
+                }
+                totalWallArea += areaWalls; // Accumulate wall area for total paint calculation
             }
 
-            // Calculate ceiling cost
+            // Calculate ceiling cost based on floor area
             if (document.getElementById(`ceilingSmooth${i}`)?.checked) {
-                roomCost += areaCeiling * prices.smoothCeiling;
-                totalAreaToPaint += areaCeiling; // Add ceiling area to total for paint
+                roomCost += areaFloor * prices.smoothCeiling;
             }
             if (document.getElementById(`ceilingTextured${i}`)?.checked) {
-                roomCost += areaCeiling * prices.smoothCeiling; // Assuming same price for textured for simplicity
-                totalAreaToPaint += areaCeiling; // Add ceiling area to total for paint
+                roomCost += areaFloor * prices.texturedCeiling;
             }
 
             // Calculate trim cost based on floor area
+            const trimCoats = document.getElementById(`trimCoats${i}`).value;
+            const trimPrice = trimCoats === "3" ? prices.standardTrim.threeCoats : prices.standardTrim.base;
             if (document.getElementById(`trimStandard${i}`)?.checked) {
-                const trimPrice = trimCoats === "3" ? prices.standardTrim.threeCoats : prices.standardTrim.twoCoats;
-                roomCost += areaTrim * trimPrice;
-                totalAreaToPaint += areaTrim; // Add trim area to total for paint
+                roomCost += areaFloor * trimPrice;
             }
+
+            const detailedTrimPrice = trimCoats === "3" ? prices.detailedTrim.threeCoats : prices.detailedTrim.base;
             if (document.getElementById(`trimDetailed${i}`)?.checked) {
-                const trimPrice = trimCoats === "3" ? prices.detailedTrim.threeCoats : prices.detailedTrim.twoCoats;
-                roomCost += areaTrim * trimPrice;
-                totalAreaToPaint += areaTrim; // Add trim area to total for paint
+                roomCost += areaFloor * detailedTrimPrice;
             }
 
             // Calculate door cost
@@ -236,35 +239,27 @@
             totalCost += roomCost; // Accumulate total cost
         }
 
-        // Calculate total paint needed
-        const totalGallons = Math.ceil(totalAreaToPaint / coveragePerGallon);
-        const paintCost = selectedPaintType === 'emeraldPaint' ? totalGallons * prices.emeraldPaintUpgradeCost : 0; // Add cost for Emerald Paint
-        totalCost += paintCost;
-
         // Update total cost and paint needed in the UI
         document.getElementById('totalPrice').innerText = `Total Estimated Cost: $${totalCost.toFixed(2)}`;
-        document.getElementById('paintNeeded').innerText = `Total Paint Needed: ${totalGallons} gallons`;
+        document.getElementById('paintNeeded').innerText = `Total Paint Needed: ${Math.ceil(totalWallArea / prices.coveragePerGallon)} gallons`;
     }
 
     function exportToPDF() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
-        doc.text("Interior Painting Cost Estimate", 20, 20);
+        doc.text("Interior Painting Estimate", 20, 20);
         doc.text(`Customer Name: ${document.getElementById('customerName').value}`, 20, 30);
         doc.text(`Total Estimated Cost: ${document.getElementById('totalPrice').innerText}`, 20, 40);
         doc.text(`Total Paint Needed: ${document.getElementById('paintNeeded').innerText}`, 20, 50);
-        let yOffset = 60;
-        
+
         for (let i = 1; i <= roomCount; i++) {
             if (document.getElementById(`selectRoom${i}`).checked) {
                 const roomName = document.getElementById(`roomName${i}`).value;
-                doc.text(`Room ${i}: ${roomName}`, 20, yOffset);
-                yOffset += 10;
-                doc.text(document.getElementById(`result${i}`).innerText, 20, yOffset);
-                yOffset += 10;
+                doc.text(`Room ${i}: ${roomName}`, 20, 60 + (i * 10));
+                doc.text(document.getElementById(`result${i}`).innerText, 20, 70 + (i * 10));
             }
         }
-        
+
         doc.save("painting_estimate.pdf");
     }
 
