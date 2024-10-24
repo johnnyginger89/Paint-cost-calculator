@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interior Painting Cost Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 20px;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        .company-name {
+            font-size: 1.5em;
+            color: #003366;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .room {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            background-color: #fff;
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: bold;
+        }
+        input[type="number"], input[type="text"] {
+            width: calc(100% - 20px);
+            padding: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #003366;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #002244;
+        }
+        .note {
+            margin: 20px 0;
+            font-style: italic;
+            color: #555;
+        }
+        .result {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #28a745;
+            margin-top: 10px;
+        }
+        .total-price {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #003366;
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="company-name">Grandview Painting</div>
+<h1>Interior Painting Cost Calculator</h1>
+
+<label for="customerName">Customer Name:</label>
+<input type="text" id="customerName" placeholder="Enter your name" required>
+
+<form id="costCalculator">
+    <div class="room" id="room1">
+        <label>
+            <input type="checkbox" id="selectRoom1" checked onchange="calculateCosts()"> Select Room 1
+        </label>
+        <label for="roomName1">Room Name:</label>
+        <input type="text" id="roomName1" required>
+
+        <label for="roomLength1">Room Length (ft):</label>
+        <input type="number" id="roomLength1" required oninput="calculateCosts()">
+
+        <label for="roomWidth1">Room Width (ft):</label>
+        <input type="number" id="roomWidth1" required oninput="calculateCosts()">
+
+        <label for="roomHeight1">Room Height (ft):</label>
+        <input type="number" id="roomHeight1" required oninput="calculateCosts()">
+
+        <label for="numDoors1">Number of Doors:</label>
+        <input type="number" id="numDoors1" min="0" value="0" oninput="calculateCosts()">
+
+        <label>Select Substrates to Paint:</label>
+        <div class="checkbox-group">
+            <label><input type="checkbox" value="walls" id="walls1" onchange="calculateCosts()"> Walls</label>
+            <label><input type="checkbox" value="ceilingSmooth" id="ceilingSmooth1" onchange="calculateCosts()"> Ceilings (Smooth)</label>
+            <label><input type="checkbox" value="ceilingTextured" id="ceilingTextured1" onchange="calculateCosts()"> Ceilings (Textured)</label>
+            <label><input type="checkbox" value="trimStandard" id="trimStandard1" onchange="calculateCosts()"> Standard Trim</label>
+            <label><input type="checkbox" value="trimDetailed" id="trimDetailed1" onchange="calculateCosts()"> Detailed Trim</label>
+            <label><input type="checkbox" value="doors" id="doors1" onchange="calculateCosts()"> Doors</label>
+        </div>
+
+        <h2 class="result" id="result1"></h2>
+    </div>
+
+    <div class="room" id="room2">
+        <label>
+            <input type="checkbox" id="selectRoom2" checked onchange="calculateCosts()"> Select Room 2
+        </label>
+        <label for="roomName2">Room Name:</label>
+        <input type="text" id="roomName2" required>
+
+        <label for="roomLength2">Room Length (ft):</label>
+        <input type="number" id="roomLength2" required oninput="calculateCosts()">
+
+        <label for="roomWidth2">Room Width (ft):</label>
+        <input type="number" id="roomWidth2" required oninput="calculateCosts()">
+
+        <label for="roomHeight2">Room Height (ft):</label>
+        <input type="number" id="roomHeight2" required oninput="calculateCosts()">
+
+        <label for="numDoors2">Number of Doors:</label>
+        <input type="number" id="numDoors2" min="0" value="0" oninput="calculateCosts()">
+
+        <label>Select Substrates to Paint:</label>
+        <div class="checkbox-group">
+            <label><input type="checkbox" value="walls" id="walls2" onchange="calculateCosts()"> Walls</label>
+            <label><input type="checkbox" value="ceilingSmooth" id="ceilingSmooth2" onchange="calculateCosts()"> Ceilings (Smooth)</label>
+            <label><input type="checkbox" value="ceilingTextured" id="ceilingTextured2" onchange="calculateCosts()"> Ceilings (Textured)</label>
+            <label><input type="checkbox" value="trimStandard" id="trimStandard2" onchange="calculateCosts()"> Standard Trim</label>
+            <label><input type="checkbox" value="trimDetailed" id="trimDetailed2" onchange="calculateCosts()"> Detailed Trim</label>
+            <label><input type="checkbox" value="doors" id="doors2" onchange="calculateCosts()"> Doors</label>
+        </div>
+
+        <h2 class="result" id="result2"></h2>
+    </div>
+
+    <div class="room" id="room3">
+        <label>
+            <input type="checkbox" id="selectRoom3" checked onchange="calculateCosts()"> Select Room 3
+        </label>
+        <label for="roomName3">Room Name:</label>
+        <input type="text" id="roomName3" required>
+
+        <label for="roomLength3">Room Length (ft):</label>
+        <input type="number" id="roomLength3" required oninput="calculateCosts()">
+
+        <label for="roomWidth3">Room Width (ft):</label>
+        <input type="number" id="roomWidth3" required oninput="calculateCosts()">
+
+        <label for="roomHeight3">Room Height (ft):</label>
+        <input type="number" id="roomHeight3" required oninput="calculateCosts()">
+
+        <label for="numDoors3">Number of Doors:</label>
+        <input type="number" id="numDoors3" min="0" value="0" oninput="calculateCosts()">
+
+        <label>Select Substrates to Paint:</label>
+        <div class="checkbox-group">
+            <label><input type="checkbox" value="walls" id="walls3" onchange="calculateCosts()"> Walls</label>
+            <label><input type="checkbox" value="ceilingSmooth" id="ceilingSmooth3" onchange="calculateCosts()"> Ceilings (Smooth)</label>
+            <label><input type="checkbox" value="ceilingTextured" id="ceilingTextured3" onchange="calculateCosts()"> Ceilings (Textured)</label>
+            <label><input type="checkbox" value="trimStandard" id="trimStandard3" onchange="calculateCosts()"> Standard Trim</label>
+            <label><input type="checkbox" value="trimDetailed" id="trimDetailed3" onchange="calculateCosts()"> Detailed Trim</label>
+            <label><input type="checkbox" value="doors" id="doors3" onchange="calculateCosts()"> Doors</label>
+        </div>
+
+        <h2 class="result" id="result3"></h2>
+    </div>
+
+    <div class="room" id="room4">
+        <label>
+            <input type="checkbox" id="selectRoom4" checked onchange="calculateCosts()"> Select Room 4
+        </label>
+        <label for="roomName4">Room Name:</label>
+        <input type="text" id="roomName4" required>
+
+        <label for="roomLength4">Room Length (ft):</label>
+        <input type="number" id="roomLength4" required oninput="calculateCosts()">
+
+        <label for="roomWidth4">Room Width (ft):</label>
+        <input type="number" id="roomWidth4" required oninput="calculateCosts()">
+
+        <label for="roomHeight4">Room Height (ft):</label>
+        <input type="number" id="roomHeight4" required oninput="calculateCosts()">
+
+        <label for="numDoors4">Number of Doors:</label>
+        <input type="number" id="numDoors4" min="0" value="0" oninput="calculateCosts()">
+
+        <label>Select Substrates to Paint:</label>
+        <div class="checkbox-group">
+            <label><input type="checkbox" value="walls" id="walls4" onchange="calculateCosts()"> Walls</label>
+            <label><input type="checkbox" value="ceilingSmooth" id="ceilingSmooth4" onchange="calculateCosts()"> Ceilings (Smooth)</label>
+            <label><input type="checkbox" value="ceilingTextured" id="ceilingTextured4" onchange="calculateCosts()"> Ceilings (Textured)</label>
+            <label><input type="checkbox" value="trimStandard" id="trimStandard4" onchange="calculateCosts()"> Standard Trim</label>
+            <label><input type="checkbox" value="trimDetailed" id="trimDetailed4" onchange="calculateCosts()"> Detailed Trim</label>
+            <label><input type="checkbox" value="doors" id="doors4" onchange="calculateCosts()"> Doors</label>
+        </div>
+
+        <h2 class="result" id="result4"></h2>
+    </div>
+
+    <div class="room" id="room5">
+        <label>
+            <input type="checkbox" id="selectRoom5" checked onchange="calculateCosts()"> Select Room 5
+        </label>
+        <label for="roomName5">Room Name:</label>
+        <input type="text" id="roomName5" required>
+
+        <label for="roomLength5">Room Length (ft):</label>
+        <input type="number" id="roomLength5" required oninput="calculateCosts()">
+
+        <label for="roomWidth5">Room Width (ft):</label>
+        <input type="number" id="roomWidth5" required oninput="calculateCosts()">
+
+        <label for="roomHeight5">Room Height (ft):</label>
+        <input type="number" id="roomHeight5" required oninput="calculateCosts()">
+
+        <label for="numDoors5">Number of Doors:</label>
+        <input type="number" id="numDoors5" min="0" value="0" oninput="calculateCosts()">
+
+        <label>Select Substrates to Paint:</label>
+        <div class="checkbox-group">
+            <label><input type="checkbox" value="walls" id="walls5" onchange="calculateCosts()"> Walls</label>
+            <label><input type="checkbox" value="ceilingSmooth" id="ceilingSmooth5" onchange="calculateCosts()"> Ceilings (Smooth)</label>
+            <label><input type="checkbox" value="ceilingTextured" id="ceilingTextured5" onchange="calculateCosts()"> Ceilings (Textured)</label>
+            <label><input type="checkbox" value="trimStandard" id="trimStandard5" onchange="calculateCosts()"> Standard Trim</label>
+            <label><input type="checkbox" value="trimDetailed" id="trimDetailed5" onchange="calculateCosts()"> Detailed Trim</label>
+            <label><input type="checkbox" value="doors" id="doors5" onchange="calculateCosts()"> Doors</label>
+        </div>
+
+        <h2 class="result" id="result5"></h2>
+    </div>
+
+    <div class="total-price" id="totalPrice">Total Estimated Cost: $0.00</div>
+    <button onclick="exportToPDF()">Export to PDF</button>
+    <div class="note">*Please note that these are approximate prices.</div>
+</form>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+    function calculateCosts() {
+        const prices = {
+            walls: 1.5,
+            ceilingSmooth: 1.2,
+            ceilingTextured: 1.5,
+            trimStandard: 2.0,
+            trimDetailed: 2.5,
+            door: 1.8
+        };
+
+        let totalCost = 0;
+
+        for (let i = 1; i <= 5; i++) {
+            const roomSelected = document.getElementById(`selectRoom${i}`).checked;
+            if (!roomSelected) continue;
+
+            const roomName = document.getElementById(`roomName${i}`).value;
+            const length = parseFloat(document.getElementById(`roomLength${i}`).value) || 0;
+            const width = parseFloat(document.getElementById(`roomWidth${i}`).value) || 0;
+            const height = parseFloat(document.getElementById(`roomHeight${i}`).value) || 0;
+            const numDoors = parseInt(document.getElementById(`numDoors${i}`).value) || 0;
+
+            const areaWalls = 2 * height * (length + width);
+            const areaCeiling = length * width;
+            const areaTrim = 2 * (length + width);
+            const areaDoors = numDoors * 21; // Assuming each door is 21 sq ft
+
+            let roomCost = 0;
+
+            if (document.getElementById(`walls${i}`).checked) {
+                roomCost += areaWalls * prices.walls;
+            }
+            if (document.getElementById(`ceilingSmooth${i}`).checked) {
+                roomCost += areaCeiling * prices.ceilingSmooth;
+            }
+            if (document.getElementById(`ceilingTextured${i}`).checked) {
+                roomCost += areaCeiling * prices.ceilingTextured;
+            }
+            if (document.getElementById(`trimStandard${i}`).checked) {
+                roomCost += areaTrim * prices.trimStandard;
+            }
+            if (document.getElementById(`trimDetailed${i}`).checked) {
+                roomCost += areaTrim * prices.trimDetailed;
+            }
+            if (document.getElementById(`doors${i}`).checked) {
+                roomCost += areaDoors * prices.door;
+            }
+
+            document.getElementById(`result${i}`).innerText = roomName ? `${roomName}: $${roomCost.toFixed(2)}` : '';
+            totalCost += roomCost;
+        }
+
+        document.getElementById('totalPrice').innerText = `Total Estimated Cost: $${totalCost.toFixed(2)}`;
+    }
+
+    function exportToPDF() {
+        const customerName = document.getElementById('customerName').value;
+        const totalCost = document.getElementById('totalPrice').innerText;
+        const pdf = new jsPDF();
+
+        pdf.setFontSize(20);
+        pdf.text("Interior Painting Cost Estimate", 20, 20);
+        pdf.setFontSize(16);
+        pdf.text(`Customer Name: ${customerName}`, 20, 40);
+        pdf.text(totalCost, 20, 60);
+
+        for (let i = 1; i <= 5; i++) {
+            const roomName = document.getElementById(`roomName${i}`).value;
+            const roomResult = document.getElementById(`result${i}`).innerText;
+
+            if (roomName && roomResult) {
+                pdf.text(`${roomName}: ${roomResult}`, 20, 70 + (i * 10));
+            }
+        }
+
+        pdf.save("Painting_Cost_Estimate.pdf");
+    }
+</script>
+
+</body>
+</html>
