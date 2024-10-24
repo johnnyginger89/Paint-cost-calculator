@@ -191,7 +191,7 @@
             const areaFloor = length * width;
             const areaWalls = 2 * height * (length + width);
             const areaCeiling = areaFloor; // Ceiling area equals floor area
-            const areaTrim = (2 * (length + width)) * (4 / 12); // Assuming trim height is 4 inches
+            const areaTrim = areaFloor; // Trim area equals floor area
             const areaDoors = numDoors * 21; // Assuming each door is 21 sq ft
 
             let roomCost = 0;
