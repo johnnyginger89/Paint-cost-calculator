@@ -34,7 +34,7 @@
             margin: 10px 0 5px;
             font-weight: bold;
         }
-        input[type="number"], input[type="text"] {
+        input[type="number"], input[type="text"], select {
             width: calc(100% - 20px);
             padding: 8px;
             margin-bottom: 20px;
@@ -64,7 +64,7 @@
             color: #28a745;
             margin-top: 10px;
         }
-        .total-price {
+        .total-price, .paint-needed {
             font-size: 1.5em;
             font-weight: bold;
             color: #003366;
@@ -84,7 +84,26 @@
 <form id="costCalculator">
     <div id="roomsContainer"></div>
     <button type="button" onclick="addRoom()">Add Room</button>
+    
     <div class="total-price" id="totalPrice">Total Estimated Cost: $0.00</div>
+    <div class="paint-needed" id="paintNeeded">Total Paint Needed: 0 gallons</div>
+
+    <label for="projectPaintType">Select Wall Paint for Entire Project:</label>
+    <select id="projectPaintType" onchange="calculateCosts()">
+        <option value="superPaint">Sherwin Williams Super Paint</option>
+        <option value="emeraldPaint">Sherwin Williams Emerald Paint</option>
+    </select>
+
+    <label for="ceilingPaintType">Select Ceiling Paint:</label>
+    <select id="ceilingPaintType" onchange="calculateCosts()">
+        <option value="promar400">Sherwin Williams Promar 400</option>
+    </select>
+
+    <label for="trimPaintType">Select Trim Paint:</label>
+    <select id="trimPaintType" onchange="calculateCosts()">
+        <option value="proClassic">Sherwin Williams Pro Classic</option>
+    </select>
+
     <button type="button" onclick="exportToPDF()">Export to PDF</button>
     <div class="note">*Please note that these are approximate prices.</div>
 </form>
@@ -133,15 +152,17 @@
 
     function calculateCosts() {
         const prices = {
-            walls: 1.5,
-            ceilingSmooth: 1.2,
-            ceilingTextured: 1.5,
-            trimStandard: 2.0,
-            trimDetailed: 2.5,
-            door: 1.8
+            walls: { base: 2.99, upgrade: 4.50 }, // Wall prices based on height
+            ceiling: 1.2, // Price per sqft for ceilings
+            trim: 2.0, // Price per sqft for trim
+            door: 1.8 // Price per sqft for doors
         };
 
         let totalCost = 0;
+        let totalAreaToPaint = 0; // Initialize total area for paint calculation
+        const coveragePerGallon = 400; // Coverage per gallon for all paints
+        const emeraldPaintUpgradeCost = 45.83; // Additional cost for Emerald Paint
+        const selectedPaintType = document.getElementById('projectPaintType').value;
 
         for (let i = 1; i <= roomCount; i++) {
             const roomSelected = document.getElementById(`selectRoom${i}`)?.checked;
@@ -155,58 +176,65 @@
 
             const areaWalls = 2 * height * (length + width);
             const areaCeiling = length * width;
-            const areaTrim = 2 * (length + width);
+            const areaTrim = (2 * (length + width)) * (4 / 12); // Convert trim height to feet
             const areaDoors = numDoors * 21; // Assuming each door is 21 sq ft
 
             let roomCost = 0;
 
+            // Determine wall price based on ceiling height
+            const wallPrice = height <= 9 ? prices.walls.base : prices.walls.upgrade;
+
             if (document.getElementById(`walls${i}`)?.checked) {
-                roomCost += areaWalls * prices.walls;
+                roomCost += areaWalls * wallPrice;
+                totalAreaToPaint += areaWalls; // Add wall area to total for paint
             }
-            if (document.getElementById(`ceilingSmooth${i}`)?.checked) {
-                roomCost += areaCeiling * prices.ceilingSmooth;
+            if (document.getElementById(`ceilingSmooth${i}`)?.checked || document.getElementById(`ceilingTextured${i}`)?.checked) {
+                roomCost += areaCeiling * prices.ceiling;
+                totalAreaToPaint += areaCeiling; // Add ceiling area to total for paint
             }
-            if (document.getElementById(`ceilingTextured${i}`)?.checked) {
-                roomCost += areaCeiling * prices.ceilingTextured;
-            }
-            if (document.getElementById(`trimStandard${i}`)?.checked) {
-                roomCost += areaTrim * prices.trimStandard;
-            }
-            if (document.getElementById(`trimDetailed${i}`)?.checked) {
-                roomCost += areaTrim * prices.trimDetailed;
+            if (document.getElementById(`trimStandard${i}`)?.checked || document.getElementById(`trimDetailed${i}`)?.checked) {
+                roomCost += areaTrim * prices.trim;
+                totalAreaToPaint += areaTrim; // Add trim area to total for paint
             }
             if (document.getElementById(`doors${i}`)?.checked) {
                 roomCost += areaDoors * prices.door;
             }
 
+            // Display room cost
             document.getElementById(`result${i}`).innerText = roomName ? `${roomName}: $${roomCost.toFixed(2)}` : '';
-            totalCost += roomCost;
+            totalCost += roomCost; // Accumulate total cost
         }
 
+        // Calculate total paint needed
+        const totalGallons = Math.ceil(totalAreaToPaint / coveragePerGallon);
+        const paintCost = selectedPaintType === 'emeraldPaint' ? totalGallons * emeraldPaintUpgradeCost : totalGallons * 0; // Add cost for Emerald Paint
+        totalCost += paintCost;
+
+        // Update total cost and paint needed in the UI
         document.getElementById('totalPrice').innerText = `Total Estimated Cost: $${totalCost.toFixed(2)}`;
+        document.getElementById('paintNeeded').innerText = `Total Paint Needed: ${totalGallons} gallons`;
     }
 
     function exportToPDF() {
-        const customerName = document.getElementById('customerName').value;
-        const totalCost = document.getElementById('totalPrice').innerText;
-        const pdf = new jsPDF();
-
-        pdf.setFontSize(20);
-        pdf.text("Interior Painting Cost Estimate", 20, 20);
-        pdf.setFontSize(16);
-        pdf.text(`Customer Name: ${customerName}`, 20, 40);
-        pdf.text(totalCost, 20, 60);
-
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        doc.text("Interior Painting Cost Estimate", 20, 20);
+        doc.text(`Customer Name: ${document.getElementById('customerName').value}`, 20, 30);
+        doc.text(`Total Estimated Cost: ${document.getElementById('totalPrice').innerText}`, 20, 40);
+        doc.text(`Total Paint Needed: ${document.getElementById('paintNeeded').innerText}`, 20, 50);
+        let yOffset = 60;
+        
         for (let i = 1; i <= roomCount; i++) {
-            const roomName = document.getElementById(`roomName${i}`).value;
-            const roomResult = document.getElementById(`result${i}`).innerText;
-
-            if (roomName && roomResult) {
-                pdf.text(`${roomName}: ${roomResult}`, 20, 70 + (i * 10));
+            if (document.getElementById(`selectRoom${i}`).checked) {
+                const roomName = document.getElementById(`roomName${i}`).value;
+                doc.text(`Room ${i}: ${roomName}`, 20, yOffset);
+                yOffset += 10;
+                doc.text(document.getElementById(`result${i}`).innerText, 20, yOffset);
+                yOffset += 10;
             }
         }
-
-        pdf.save("Painting_Cost_Estimate.pdf");
+        
+        doc.save("painting_estimate.pdf");
     }
 
     // Initialize with one room
