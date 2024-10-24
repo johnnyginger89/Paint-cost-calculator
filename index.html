@@ -167,8 +167,8 @@
             walls: { base: 2.99, threeCoats: 4.49 },
             smoothCeiling: 1.50,
             texturedCeiling: 1.75,
-            standardTrim: { base: 1.50, threeCoats: 2.25 },
-            detailedTrim: { base: 2.50, threeCoats: 2.85 },
+            standardTrim: { twoCoats: 1.50, threeCoats: 2.25 },
+            detailedTrim: { twoCoats: 2.20, threeCoats: 3.00 },
             door: 65, // Flat price for doors
             emeraldPaintUpgradeCost: 43.85 // Cost increase for Emerald Paint
         };
@@ -189,20 +189,18 @@
             const height = parseFloat(document.getElementById(`roomHeight${i}`).value) || 0;
             const numDoors = parseInt(document.getElementById(`numDoors${i}`).value) || 0;
 
-            const areaFloor = length * width;
+            const areaFloor = length * width; // Floor area for pricing
             const areaWalls = 2 * height * (length + width); // Total wall surface area
             const areaCeiling = areaFloor; // Ceiling area equals floor area
-            const areaTrim = (2 * (length + width)) * (4 / 12); // Assuming trim height is 4 inches
             const areaDoors = numDoors * 21; // Assuming each door is 21 sq ft
 
             let roomCost = 0;
-            const wallCoats = document.getElementById(`wallCoats${i}`).value;
-            const trimCoats = document.getElementById(`trimCoats${i}`).value;
 
-            // Calculate wall cost based on floor area
+            // Calculate wall cost based on wall area
+            const wallCoats = document.getElementById(`wallCoats${i}`).value;
             const wallPrice = wallCoats === "3" ? prices.walls.threeCoats : prices.walls.base;
             if (document.getElementById(`walls${i}`)?.checked) {
-                roomCost += areaFloor * wallPrice; // Pricing based on floor area
+                roomCost += areaWalls * wallPrice; // Pricing based on wall area
                 totalAreaToPaint += areaWalls; // Add wall area to total for paint
             }
 
@@ -216,16 +214,17 @@
                 totalAreaToPaint += areaCeiling; // Add ceiling area to total for paint
             }
 
-            // Calculate trim cost based on trim area
+            // Calculate trim cost based on floor area
+            const trimCoats = document.getElementById(`trimCoats${i}`).value;
             if (document.getElementById(`trimStandard${i}`)?.checked) {
-                const trimPrice = trimCoats === "3" ? prices.standardTrim.threeCoats : prices.standardTrim.base;
-                roomCost += areaTrim * trimPrice;
-                totalAreaToPaint += areaTrim; // Add trim area to total for paint
+                const trimPrice = trimCoats === "3" ? prices.standardTrim.threeCoats : prices.standardTrim.twoCoats;
+                roomCost += areaFloor * trimPrice;
+                totalAreaToPaint += areaFloor; // Add floor area to total for paint
             }
             if (document.getElementById(`trimDetailed${i}`)?.checked) {
-                const trimPrice = trimCoats === "3" ? prices.detailedTrim.threeCoats : prices.detailedTrim.base;
-                roomCost += areaTrim * trimPrice;
-                totalAreaToPaint += areaTrim; // Add trim area to total for paint
+                const detailedTrimPrice = trimCoats === "3" ? prices.detailedTrim.threeCoats : prices.detailedTrim.twoCoats;
+                roomCost += areaFloor * detailedTrimPrice;
+                totalAreaToPaint += areaFloor; // Add floor area to total for paint
             }
 
             // Calculate door cost
@@ -256,7 +255,7 @@
         doc.text(`Total Estimated Cost: ${document.getElementById('totalPrice').innerText}`, 20, 40);
         doc.text(`Total Paint Needed: ${document.getElementById('paintNeeded').innerText}`, 20, 50);
         let yOffset = 60;
-        
+
         for (let i = 1; i <= roomCount; i++) {
             if (document.getElementById(`selectRoom${i}`).checked) {
                 const roomName = document.getElementById(`roomName${i}`).value;
@@ -266,7 +265,7 @@
                 yOffset += 10;
             }
         }
-        
+
         doc.save("painting_estimate.pdf");
     }
 
@@ -276,4 +275,3 @@
 
 </body>
 </html>
-
